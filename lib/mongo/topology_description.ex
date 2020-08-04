@@ -9,6 +9,8 @@ defmodule Mongo.TopologyDescription do
   alias Mongo.ServerDescription
   alias Mongo.ReadPreference
 
+  require Logger
+
   # see https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#topologydescription
   @type type ::
           :unknown | :single | :replica_set_no_primary | :replica_set_with_primary | :sharded
@@ -102,7 +104,7 @@ defmodule Mongo.TopologyDescription do
         for {server, _} <- servers do
           server
         end
-
+      Logger.info inspect {__MODULE__, :select_servers, {topology.servers, topology.type, type, opts, read_preference, servers}}
       {:ok, servers, slave_ok, mongos?}
     end
   end

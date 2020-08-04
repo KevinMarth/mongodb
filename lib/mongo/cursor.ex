@@ -1,5 +1,7 @@
 import Record, only: [defrecordp: 2]
 
+require Logger
+
 # TODO: Check options to Mongo function
 
 # TODO: Handle error responses from Mongo.raw_find, example:
@@ -46,10 +48,14 @@ defmodule Mongo.Cursor do
       opts = batch_size(limit, opts)
 
       fn ->
+        time = :erlang.monotonic_time()
         result = Mongo.raw_find(conn, coll, query, projector, opts)
+        duration = :erlang.monotonic_time() - time
 
         case result do
           {:ok, %{cursor_id: cursor, docs: docs, num: num}} ->
+            arguments = {conn, coll, query, projector, opts}
+            Logger.info inspect {Mongo, :raw_find, {arguments, {cursor, num, duration}}}
             state(conn: conn, cursor: cursor, buffer: docs, limit: new_limit(limit, num))
 
           {:error, error} ->

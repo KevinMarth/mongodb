@@ -54,6 +54,8 @@ defmodule Mongo do
   alias Mongo.Topology
   alias Mongo.UrlParser
 
+  require Logger
+
   @timeout 5000
 
   @dialyzer nowarn_function: [count_documents!: 4]
@@ -134,6 +136,7 @@ defmodule Mongo do
   """
   @spec start_link(Keyword.t()) :: {:ok, pid} | {:error, Mongo.Error.t() | atom}
   def start_link(opts) do
+    Logger.info inspect {__MODULE__, :start_link, {opts}}
     opts
     |> UrlParser.parse_url()
     |> Mongo.ConfigHide.mask_password()
@@ -1076,7 +1079,9 @@ defmodule Mongo do
 
   defp select_servers(topology_pid, type, opts) do
     start_time = System.monotonic_time()
-    select_servers(topology_pid, type, opts, start_time)
+    servers = select_servers(topology_pid, type, opts, start_time)
+    Logger.info inspect {__MODULE__, :select_servers, {topology_pid, type, opts, servers}}
+    servers
   end
 
   @sel_timeout 30000
